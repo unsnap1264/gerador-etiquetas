@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Etiquetas (9x3 cm)</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 15px;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            font-size: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+            font-size: 14px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #print-area {
+            display: none;
+        }
+
+        /* Configuração estrita para forçar 1 única página de 9cm x 3cm */
+        @media print {
+            @page {
+                size: 9cm 3cm;
+                margin: 0;
+            }
+            html, body {
+                width: 9cm;
+                height: 3cm;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            body * {
+                visibility: hidden;
+            }
+            #print-area, #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                display: block;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 9cm;
+                height: 3cm;
+                margin: 0;
+                padding: 0;
+                page-break-after: avoid;
+                page-break-before: avoid;
+            }
+            .etiqueta-pagina {
+                width: 9cm;
+                height: 3cm;
+                box-sizing: border-box;
+                padding: 2mm 3mm;
+                overflow: hidden;
+                font-family: monospace;
+                font-size: 11px;
+                line-height: 1.25;
+            }
+            .etiqueta-pagina p {
+                margin: 1px 0;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="form-container">
+    <h2>Gerador de Etiquetas (9x3 cm)</h2>
+    
+    <div class="form-group">
+        <label>Nome do Cliente:</label>
+        <input type="text" id="nome" value="ISMAEL">
+    </div>
+
+    <div class="form-group">
+        <label>Destino:</label>
+        <input type="text" id="destino" value="PORTO ALEGRE">
+    </div>
+
+    <div class="form-group">
+        <label>Peso Total:</label>
+        <input type="text" id="peso" value="2500g">
+    </div>
+
+    <div class="form-group">
+        <label>Quantidade:</label>
+        <input type="text" id="qtd" value="2500">
+    </div>
+
+    <div class="form-group">
+        <label>Lote:</label>
+        <input type="text" id="lote" value="TM-12082026-163">
+    </div>
+
+    <button onclick="imprimirEtiqueta()">Gerar e Imprimir Etiqueta</button>
+</div>
+
+<div id="print-area"></div>
+
+<script>
+    function imprimirEtiqueta() {
+        const nome = document.getElementById('nome').value || 'N/A';
+        const destino = document.getElementById('destino').value || 'N/A';
+        const peso = document.getElementById('peso').value || 'N/A';
+        const qtd = document.getElementById('qtd').value || 'N/A';
+        const lote = document.getElementById('lote').value || 'N/A';
+        const dataAtual = new Date().toLocaleDateString('pt-BR');
+
+        const printArea = document.getElementById('print-area');
+        printArea.innerHTML = '';
+
+        // Injeta estritamente um único bloco de etiqueta
+        printArea.innerHTML = `
+            <div class="etiqueta-pagina">
+                <p><strong>Data:</strong> ${dataAtual}</p>
+                <p><strong>Nome:</strong> ${nome}</p>
+                <p><strong>Destino:</strong> ${destino}</p>
+                <p><strong>Peso:</strong> ${peso} &nbsp;|&nbsp; <strong>Qtd:</strong> ${qtd}</p>
+                <p><strong>Lote:</strong> ${lote}</p>
+            </div>
+        `;
+
+        window.print();
+    }
+</script>
+
+</body>
+</html>
