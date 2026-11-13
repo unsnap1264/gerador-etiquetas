@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Etiquetas ZPL/PDF (9x3 cm)</title>
+    <title>Gerador Avançado de Etiquetas (9x3 cm)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -12,7 +12,7 @@
             padding: 15px;
         }
         .container {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             background: #fff;
             padding: 20px;
@@ -26,7 +26,7 @@
             margin-top: 0;
         }
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
         label {
             display: block;
@@ -35,13 +35,29 @@
             color: #555;
             font-size: 14px;
         }
-        input {
+        select, input, textarea {
             width: 100%;
             padding: 10px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 6px;
             font-size: 16px;
+        }
+        textarea {
+            resize: vertical;
+            height: 90px;
+            font-family: inherit;
+        }
+        .model-section {
+            display: none;
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e1e1e8;
+            margin-bottom: 15px;
+        }
+        .model-section.active {
+            display: block;
         }
         .btn-group {
             display: flex;
@@ -79,82 +95,340 @@
 <body>
 
 <div class="container">
-    <h2>Gerador de Etiquetas (9x3 cm)</h2>
+    <h2>Gerador Avançado de Etiquetas (9x3 cm)</h2>
     
     <div class="form-group">
-        <label>Nome do Cliente:</label>
-        <input type="text" id="nome" value="ISMAEL">
+        <label for="modeloSelect">Selecione o Modelo:</label>
+        <select id="modeloSelect" onchange="mudarModelo()">
+            <option value="bandejas">Bandejas</option>
+            <option value="grilo">Grilo</option>
+            <option value="pupas">Pupas</option>
+            <option value="simples">Simples</option>
+        </select>
     </div>
 
-    <div class="form-group">
-        <label>Destino:</label>
-        <input type="text" id="destino" value="PORTO ALEGRE">
+    <!-- MODELO: BANDEJAS -->
+    <div id="sec-bandejas" class="model-section active">
+        <h3>Modelo: Bandejas</h3>
+        <div class="form-group">
+            <label>Lote (LT):</label>
+            <input type="text" id="b_lote" value="TM - 071026-06" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Início:</label>
+            <input type="text" id="b_inicio" value="01/11/2026" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Número da Postura (ex: 5°):</label>
+            <input type="text" id="b_posturaNum" value="5" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Data Postura Inicial:</label>
+            <input type="text" id="b_dtIni" value="16/09" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Data Postura Final:</label>
+            <input type="text" id="b_dtFim" value="17/09" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Peso:</label>
+            <input type="text" id="b_peso" value="200" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>1ª Peneiragem:</label>
+            <input type="text" id="b_p1" value="30/09" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>2ª Peneiragem:</label>
+            <input type="text" id="b_p2" value="20/09" oninput="salvarDados()">
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Peso Total:</label>
-        <input type="text" id="peso" value="2500g">
+    <!-- MODELO: GRILO -->
+    <div id="sec-grilo" class="model-section">
+        <h3>Modelo: Grilo</h3>
+        <div class="form-group">
+            <label>Grilo LT:</label>
+            <input type="text" id="g_lt" value="2" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Início:</label>
+            <input type="text" id="g_inicio" value="24/10/2026" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>3ª Postura:</label>
+            <input type="text" id="g_postura" value="06/11 a 13/11" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Eclosão Ovos:</label>
+            <input type="text" id="g_eclosao" value="20/11 a 27/11" oninput="salvarDados()">
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Quantidade:</label>
-        <input type="text" id="qtd" value="2500">
+    <!-- MODELO: PUPAS -->
+    <div id="sec-pupas" class="model-section">
+        <h3>Modelo: Pupas</h3>
+        <div class="form-group">
+            <label>Data de Coleta:</label>
+            <input type="text" id="p_data" value="10/11/2026" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Lote:</label>
+            <input type="text" id="p_lote" value="P7" oninput="salvarDados()">
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Lote:</label>
-        <input type="text" id="lote" value="TM-12082026-163">
+    <!-- MODELO: SIMPLES -->
+    <div id="sec-simples" class="model-section">
+        <h3>Modelo: Simples (Personalizado)</h3>
+        <div class="form-group">
+            <label>Texto (permite quebra de linha):</label>
+            <textarea id="s_texto" oninput="salvarDados()">BRUNO/TAISA</textarea>
+        </div>
+        <div class="form-group">
+            <label>Tamanho da Fonte (Padrão: 93):</label>
+            <input type="number" id="s_fonte" value="93" oninput="salvarDados()">
+        </div>
     </div>
 
     <div class="btn-group">
-        <button class="btn-share" id="btnShare" onclick="gerarEtiquetaLabelary('compartilhar')">Gerar PDF e Imprimir / Compartilhar</button>
-        <button id="btnDownload" onclick="gerarEtiquetaLabelary('baixar')">Apenas Baixar PDF</button>
+        <button class="btn-share" id="btnShare" onclick="gerarEtiqueta('compartilhar')">Gerar PDF e Imprimir / Compartilhar</button>
+        <button id="btnDownload" onclick="gerarEtiqueta('baixar')">Apenas Baixar PDF</button>
     </div>
 
     <div class="status" id="status"></div>
 </div>
 
 <script>
-    // Remove acentos para evitar falhas de codificação ZPL padrão
     function limparTextoZPL(texto) {
+        if (!texto) return '';
         return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    function montarZPL() {
-        const nome = limparTextoZPL(document.getElementById('nome').value || 'N/A');
-        const destino = limparTextoZPL(document.getElementById('destino').value || 'N/A');
-        const peso = limparTextoZPL(document.getElementById('peso').value || 'N/A');
-        const qtd = limparTextoZPL(document.getElementById('qtd').value || 'N/A');
-        const lote = limparTextoZPL(document.getElementById('lote').value || 'N/A');
-        const dataAtual = new Date().toLocaleDateString('pt-BR');
-
-        // ^PW720 = largura 9cm (90mm * 8 dots) | ^LL240 = altura 3cm (30mm * 8 dots)
-        return `
-^XA
-^CI28
-^PW720
-^LL240
-^FO25,20^A0N,30,30^FDData: ${dataAtual}^FS
-^FO25,62^A0N,30,30^FDNome: ${nome}^FS
-^FO25,104^A0N,30,30^FDDestino: ${destino}^FS
-^FO25,146^A0N,30,30^FDPeso: ${peso}  |  Qtd: ${qtd}^FS
-^FO25,188^A0N,28,28^FDLote: ${lote}^FS
-^XZ`;
+    function mudarModelo() {
+        const modelo = document.getElementById('modeloSelect').value;
+        document.querySelectorAll('.model-section').forEach(el => el.classList.remove('active'));
+        document.getElementById('sec-' + modelo).classList.add('active');
+        localStorage.setItem('etiqueta_modelo_ativo', modelo);
     }
 
-    async function gerarEtiquetaLabelary(acao) {
+    function salvarDados() {
+        const dados = {
+            modelo: document.getElementById('modeloSelect').value,
+            b_lote: document.getElementById('b_lote').value,
+            b_inicio: document.getElementById('b_inicio').value,
+            b_posturaNum: document.getElementById('b_posturaNum').value,
+            b_dtIni: document.getElementById('b_dtIni').value,
+            b_dtFim: document.getElementById('b_dtFim').value,
+            b_peso: document.getElementById('b_peso').value,
+            b_p1: document.getElementById('b_p1').value,
+            b_p2: document.getElementById('b_p2').value,
+            g_lt: document.getElementById('g_lt').value,
+            g_inicio: document.getElementById('g_inicio').value,
+            g_postura: document.getElementById('g_postura').value,
+            g_eclosao: document.getElementById('g_eclosao').value,
+            p_data: document.getElementById('p_data').value,
+            p_lote: document.getElementById('p_lote').value,
+            s_texto: document.getElementById('s_texto').value,
+            s_fonte: document.getElementById('s_fonte').value
+        };
+        localStorage.setItem('etiquetas_dados_cache', JSON.stringify(dados));
+    }
+
+    function carregarDados() {
+        const salvo = localStorage.getItem('etiquetas_dados_cache');
+        if (salvo) {
+            try {
+                const d = JSON.parse(salvo);
+                if (d.modelo) {
+                    document.getElementById('modeloSelect').value = d.modelo;
+                    mudarModelo();
+                }
+                if (d.b_lote !== undefined) document.getElementById('b_lote').value = d.b_lote;
+                if (d.b_inicio !== undefined) document.getElementById('b_inicio').value = d.b_inicio;
+                if (d.b_posturaNum !== undefined) document.getElementById('b_posturaNum').value = d.b_posturaNum;
+                if (d.b_dtIni !== undefined) document.getElementById('b_dtIni').value = d.b_dtIni;
+                if (d.b_dtFim !== undefined) document.getElementById('b_dtFim').value = d.b_dtFim;
+                if (d.b_peso !== undefined) document.getElementById('b_peso').value = d.b_peso;
+                if (d.b_p1 !== undefined) document.getElementById('b_p1').value = d.b_p1;
+                if (d.b_p2 !== undefined) document.getElementById('b_p2').value = d.b_p2;
+                if (d.g_lt !== undefined) document.getElementById('g_lt').value = d.g_lt;
+                if (d.g_inicio !== undefined) document.getElementById('g_inicio').value = d.g_inicio;
+                if (d.g_postura !== undefined) document.getElementById('g_postura').value = d.g_postura;
+                if (d.g_eclosao !== undefined) document.getElementById('g_eclosao').value = d.g_eclosao;
+                if (d.p_data !== undefined) document.getElementById('p_data').value = d.p_data;
+                if (d.p_lote !== undefined) document.getElementById('p_lote').value = d.p_lote;
+                if (d.s_texto !== undefined) document.getElementById('s_texto').value = d.s_texto;
+                if (d.s_fonte !== undefined) document.getElementById('s_fonte').value = d.s_fonte;
+            } catch(e) {
+                console.error("Erro ao carregar localStorage", e);
+            }
+        }
+    }
+
+    function montarZPL() {
+        const modelo = document.getElementById('modeloSelect').value;
+        let zpl = "";
+
+        if (modelo === 'bandejas') {
+            const lote = limparTextoZPL(document.getElementById('b_lote').value);
+            const inicio = limparTextoZPL(document.getElementById('b_inicio').value);
+            const posturaNum = limparTextoZPL(document.getElementById('b_posturaNum').value);
+            const dtIni = limparTextoZPL(document.getElementById('b_dtIni').value);
+            const dtFim = limparTextoZPL(document.getElementById('b_dtFim').value);
+            const peso = limparTextoZPL(document.getElementById('b_peso').value);
+            const p1 = limparTextoZPL(document.getElementById('b_p1').value);
+            const p2 = limparTextoZPL(document.getElementById('b_p2').value);
+
+            zpl = `
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTD
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR4,4
+~SD8
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW719
+^LL240
+^LS0
+^FT32,67^A0N,42,43^FH\\^CI28^FDLT: ${lote}^FS^CI27
+^FT32,120^A0N,42,43^FH\\^CI28^FDInicio:${inicio}^FS^CI27
+^FT32,168^A0N,42,43^FH\\^CI28^FD${posturaNum}ºPostura^FS^CI27
+^FT217,171^A0N,42,43^FH\\^CI28^FD${dtIni} a^FS^CI27
+^FT356,173^A0N,42,43^FH\\^CI28^FD${dtFim}^FS^CI27
+^FT32,218^A0N,42,43^FH\\^CI28^FDPeso:${peso}g^FS^CI27
+^FT482,71^A0N,42,43^FH\\^CI28^FD1P:${p1}(   )^FS^CI27
+^FT486,127^A0N,42,43^FH\\^CI28^FD2P:${p2}(   )^FS^CI27
+^PQ1,0,1,Y
+^XZ`;
+
+        } else if (modelo === 'grilo') {
+            const lt = limparTextoZPL(document.getElementById('g_lt').value);
+            const inicio = limparTextoZPL(document.getElementById('g_inicio').value);
+            const postura = limparTextoZPL(document.getElementById('g_postura').value);
+            const eclosao = limparTextoZPL(document.getElementById('g_eclosao').value);
+
+            zpl = `
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTD
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR4,4
+~SD8
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW719
+^LL240
+^LS0
+^FT1,65^A0N,37,38^FB718,1,9,C^FH\\^CI28^FDGRILO LT: ${lt}\\5C&^FS^CI27
+^FT1,111^A0N,37,38^FB718,1,9,C^FH\\^CI28^FDInicio: ${inicio}\\5C&^FS^CI27
+^FT1,157^A0N,37,38^FB718,1,9,C^FH\\^CI28^FD3º postura: ${postura}\\5C&^FS^CI27
+^FT1,203^A0N,37,38^FB718,1,9,C^FH\\^CI28^FDEclosão ovos: ${eclosao}\\5C&^FS^CI27
+^PQ1,0,1,Y
+^XZ`;
+
+        } else if (modelo === 'pupas') {
+            const data = limparTextoZPL(document.getElementById('p_data').value);
+            const lote = limparTextoZPL(document.getElementById('p_lote').value);
+
+            zpl = `
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTD
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR4,4
+~SD8
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW799
+^LL240
+^LS0
+^FT651,152^A0I,37,38^FH\\^CI28^FDData de coleta: ${data}^FS^CI27
+^FT651,106^A0I,37,38^FH\\^CI28^FDLote: ${lote}              1C:___/___^FS^CI27
+^FT651,60^A0I,37,38^FH\\^CI28^FD                          2C:___/___^FS^CI27
+^PQ1,0,1,Y
+^XZ`;
+
+        } else if (modelo === 'simples') {
+            const texto = limparTextoZPL(document.getElementById('s_texto').value);
+            const fonte = parseInt(document.getElementById('s_fonte').value) || 93;
+            
+            zpl = `
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTD
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR4,4
+~SD8
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW719
+^LL240
+^LS0
+^FT1,156^A0N,${fonte},${fonte+1}^FB718,1,24,C^FH\\^CI28^FD${texto}\\5C&^FS^CI27
+^PQ1,0,1,Y
+^XZ`;
+        }
+
+        return zpl;
+    }
+
+    async function gerarEtiqueta(acao) {
         const status = document.getElementById('status');
         const btnShare = document.getElementById('btnShare');
         const btnDownload = document.getElementById('btnDownload');
-        const nomeCliente = (document.getElementById('nome').value || 'cliente').trim();
+        const modelo = document.getElementById('modeloSelect').value;
 
-        status.innerText = 'Gerando PDF na medida exata...';
+        status.innerText = 'Gerando PDF da etiqueta...';
         btnShare.disabled = true;
         btnDownload.disabled = true;
 
         const zpl = montarZPL();
-        
-        // 8dpmm = 203 DPI | 3.54x1.18 polegadas = 9cm x 3cm exatos
         const url = 'https://api.labelary.com/v1/printers/8dpmm/labels/3.54x1.18/0/';
 
         try {
@@ -172,16 +446,15 @@
             }
 
             const blob = await response.blob();
-            const nomeArquivo = `etiqueta_${nomeCliente}.pdf`;
+            const nomeArquivo = `etiqueta_${modelo}.pdf`;
             const arquivo = new File([blob], nomeArquivo, { type: 'application/pdf' });
 
             if (acao === 'compartilhar' && navigator.canShare && navigator.canShare({ files: [arquivo] })) {
                 await navigator.share({
                     files: [arquivo],
-                    title: `Etiqueta - ${nomeCliente}`
+                    title: `Etiqueta - ${modelo}`
                 });
             } else {
-                // Fallback para download direto ou abertura em nova aba no PC/Android
                 const pdfUrl = URL.createObjectURL(blob);
                 const link = document.createElement('a');
                 link.href = pdfUrl;
@@ -196,12 +469,14 @@
             status.innerText = 'PDF gerado com sucesso!';
         } catch (erro) {
             console.error(erro);
-            status.innerText = 'Erro ao conectar ao Labelary. Verifique sua internet.';
+            status.innerText = 'Erro ao conectar à API do Labelary. Verifique sua internet.';
         } finally {
             btnShare.disabled = false;
             btnDownload.disabled = false;
         }
     }
+
+    window.onload = carregarDados;
 </script>
 
 </body>
