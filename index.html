@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerador de Etiquetas (9x3 cm)</title>
+    <title>Gerador de Etiquetas ZPL/PDF (9x3 cm)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
@@ -43,32 +43,11 @@
             border-radius: 6px;
             font-size: 16px;
         }
-        .preview-box {
-            margin: 20px 0;
-            text-align: center;
-            background: #eef1f5;
-            padding: 12px;
-            border-radius: 8px;
-        }
-        .preview-box span {
-            display: block;
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        canvas {
-            width: 100%;
-            max-width: 9cm;
-            height: auto;
-            border: 1px dashed #888;
-            background: #fff;
-            display: block;
-            margin: 0 auto;
-        }
         .btn-group {
             display: flex;
             flex-direction: column;
             gap: 10px;
+            margin-top: 20px;
         }
         button {
             width: 100%;
@@ -84,15 +63,16 @@
         button.btn-share {
             background-color: #28a745;
         }
-        button:active {
-            opacity: 0.85;
+        button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
         }
-        .dica-ios {
-            font-size: 12px;
-            color: #666;
+        .status {
             text-align: center;
-            margin-top: 12px;
-            line-height: 1.4;
+            font-size: 13px;
+            color: #555;
+            margin-top: 10px;
+            min-height: 18px;
         }
     </style>
 </head>
@@ -103,131 +83,125 @@
     
     <div class="form-group">
         <label>Nome do Cliente:</label>
-        <input type="text" id="nome" value="ISMAEL" oninput="desenharEtiqueta()">
+        <input type="text" id="nome" value="ISMAEL">
     </div>
 
     <div class="form-group">
         <label>Destino:</label>
-        <input type="text" id="destino" value="PORTO ALEGRE" oninput="desenharEtiqueta()">
+        <input type="text" id="destino" value="PORTO ALEGRE">
     </div>
 
     <div class="form-group">
         <label>Peso Total:</label>
-        <input type="text" id="peso" value="2500g" oninput="desenharEtiqueta()">
+        <input type="text" id="peso" value="2500g">
     </div>
 
     <div class="form-group">
         <label>Quantidade:</label>
-        <input type="text" id="qtd" value="2500" oninput="desenharEtiqueta()">
+        <input type="text" id="qtd" value="2500">
     </div>
 
     <div class="form-group">
         <label>Lote:</label>
-        <input type="text" id="lote" value="TM-12082026-163" oninput="desenharEtiqueta()">
-    </div>
-
-    <div class="preview-box">
-        <span>Pré-visualização em Tempo Real (9cm x 3cm):</span>
-        <!-- Alta densidade (300 DPI equivalentes: 1063x354px) para preencher toda a etiqueta no iOS -->
-        <canvas id="etiquetaCanvas" width="1063" height="354"></canvas>
+        <input type="text" id="lote" value="TM-12082026-163">
     </div>
 
     <div class="btn-group">
-        <button class="btn-share" onclick="compartilharOuImprimir()">Compartilhar / Imprimir (iPhone e Android)</button>
-        <button onclick="baixarImagem()">Baixar Imagem (PNG)</button>
+        <button class="btn-share" id="btnShare" onclick="gerarEtiquetaLabelary('compartilhar')">Gerar PDF e Imprimir / Compartilhar</button>
+        <button id="btnDownload" onclick="gerarEtiquetaLabelary('baixar')">Apenas Baixar PDF</button>
     </div>
 
-    <p class="dica-ios">
-        <strong>Dica no iPhone:</strong> Ao abrir a tela de impressão do iOS, certifique-se de que o tamanho do papel está selecionado como <strong>9x3 cm (ou 90x30 mm)</strong> nas opções da impressora para evitar margens extras.
-    </p>
+    <div class="status" id="status"></div>
 </div>
 
 <script>
-    const canvas = document.getElementById('etiquetaCanvas');
-    const ctx = canvas.getContext('2d');
+    // Remove acentos para evitar falhas de codificação ZPL padrão
+    function limparTextoZPL(texto) {
+        return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    }
 
-    function desenharEtiqueta() {
-        const nome = document.getElementById('nome').value || 'N/A';
-        const destino = document.getElementById('destino').value || 'N/A';
-        const peso = document.getElementById('peso').value || 'N/A';
-        const qtd = document.getElementById('qtd').value || 'N/A';
-        const lote = document.getElementById('lote').value || 'N/A';
+    function montarZPL() {
+        const nome = limparTextoZPL(document.getElementById('nome').value || 'N/A');
+        const destino = limparTextoZPL(document.getElementById('destino').value || 'N/A');
+        const peso = limparTextoZPL(document.getElementById('peso').value || 'N/A');
+        const qtd = limparTextoZPL(document.getElementById('qtd').value || 'N/A');
+        const lote = limparTextoZPL(document.getElementById('lote').value || 'N/A');
         const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-        // 1. Fundo branco sólido
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 2. Tipografia grande e nítida ocupando toda a área útil (1063 x 354)
-        ctx.fillStyle = '#000000';
-        ctx.textBaseline = 'top';
-
-        const margemEsquerda = 30;
-        let posY = 20;
-        const espacoLinha = 65;
-
-        // Linha 1: Data
-        ctx.font = 'bold 42px monospace';
-        ctx.fillText(`Data: ${dataAtual}`, margemEsquerda, posY);
-        posY += espacoLinha;
-
-        // Linha 2: Nome
-        ctx.fillText(`Nome: ${nome}`, margemEsquerda, posY);
-        posY += espacoLinha;
-
-        // Linha 3: Destino
-        ctx.fillText(`Destino: ${destino}`, margemEsquerda, posY);
-        posY += espacoLinha;
-
-        // Linha 4: Peso e Quantidade
-        ctx.fillText(`Peso: ${peso} | Qtd: ${qtd}`, margemEsquerda, posY);
-        posY += espacoLinha;
-
-        // Linha 5: Lote
-        ctx.font = 'bold 38px monospace';
-        ctx.fillText(`Lote: ${lote}`, margemEsquerda, posY);
+        // ^PW720 = largura 9cm (90mm * 8 dots) | ^LL240 = altura 3cm (30mm * 8 dots)
+        return `
+^XA
+^CI28
+^PW720
+^LL240
+^FO25,20^A0N,30,30^FDData: ${dataAtual}^FS
+^FO25,62^A0N,30,30^FDNome: ${nome}^FS
+^FO25,104^A0N,30,30^FDDestino: ${destino}^FS
+^FO25,146^A0N,30,30^FDPeso: ${peso}  |  Qtd: ${qtd}^FS
+^FO25,188^A0N,28,28^FDLote: ${lote}^FS
+^XZ`;
     }
 
-    function baixarImagem() {
-        const nome = document.getElementById('nome').value || 'cliente';
-        const link = document.createElement('a');
-        link.download = `etiqueta_${nome}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    }
+    async function gerarEtiquetaLabelary(acao) {
+        const status = document.getElementById('status');
+        const btnShare = document.getElementById('btnShare');
+        const btnDownload = document.getElementById('btnDownload');
+        const nomeCliente = (document.getElementById('nome').value || 'cliente').trim();
 
-    function compartilharOuImprimir() {
-        const nome = document.getElementById('nome').value || 'cliente';
+        status.innerText = 'Gerando PDF na medida exata...';
+        btnShare.disabled = true;
+        btnDownload.disabled = true;
+
+        const zpl = montarZPL();
         
-        canvas.toBlob(async function(blob) {
-            const arquivo = new File([blob], `etiqueta_${nome}.png`, { type: 'image/png' });
+        // 8dpmm = 203 DPI | 3.54x1.18 polegadas = 9cm x 3cm exatos
+        const url = 'https://api.labelary.com/v1/printers/8dpmm/labels/3.54x1.18/0/';
 
-            if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
-                try {
-                    await navigator.share({
-                        files: [arquivo],
-                        title: `Etiqueta - ${nome}`
-                    });
-                } catch (err) {
-                    console.log('Compartilhamento cancelado:', err);
-                }
-            } else {
-                const dataUrl = canvas.toDataURL('image/png');
-                const janela = window.open('', '_blank');
-                janela.document.write(`
-                    <html>
-                        <head><title>Imprimir Etiqueta</title></head>
-                        <body style="margin:0; display:flex; justify-content:center; align-items:center;">
-                            <img src="${dataUrl}" style="width:9cm; height:3cm;" onload="window.print(); window.close();">
-                        </body>
-                    </html>
-                `);
-                janela.document.close();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/pdf',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: zpl
+            });
+
+            if (!response.ok) {
+                throw new Error(`Erro na API: ${response.status}`);
             }
-        }, 'image/png');
-    }
 
-    window.onload = desenharEtiqueta;
+            const blob = await response.blob();
+            const nomeArquivo = `etiqueta_${nomeCliente}.pdf`;
+            const arquivo = new File([blob], nomeArquivo, { type: 'application/pdf' });
+
+            if (acao === 'compartilhar' && navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+                await navigator.share({
+                    files: [arquivo],
+                    title: `Etiqueta - ${nomeCliente}`
+                });
+            } else {
+                // Fallback para download direto ou abertura em nova aba no PC/Android
+                const pdfUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.download = nomeArquivo;
+                link.click();
+                
+                if (acao === 'compartilhar') {
+                    window.open(pdfUrl, '_blank');
+                }
+            }
+
+            status.innerText = 'PDF gerado com sucesso!';
+        } catch (erro) {
+            console.error(erro);
+            status.innerText = 'Erro ao conectar ao Labelary. Verifique sua internet.';
+        } finally {
+            btnShare.disabled = false;
+            btnDownload.disabled = false;
+        }
+    }
 </script>
 
 </body>
