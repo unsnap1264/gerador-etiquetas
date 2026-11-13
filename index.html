@@ -56,7 +56,6 @@
             color: #666;
             margin-bottom: 8px;
         }
-        /* O Canvas tem tamanho real de 720x240px (9x3cm a 203 DPI), mas ajusta na tela do celular */
         canvas {
             width: 100%;
             max-width: 9cm;
@@ -129,8 +128,8 @@
 
     <div class="preview-box">
         <span>Pré-visualização em Tempo Real (9cm x 3cm):</span>
-        <!-- Resolução exata de 203 DPI (8 pontos por mm): 90mm = 720px | 30mm = 240px -->
-        <canvas id="etiquetaCanvas" width="720" height="240"></canvas>
+        <!-- Alta densidade (300 DPI equivalentes: 1063x354px) para preencher toda a etiqueta no iOS -->
+        <canvas id="etiquetaCanvas" width="1063" height="354"></canvas>
     </div>
 
     <div class="btn-group">
@@ -139,7 +138,7 @@
     </div>
 
     <p class="dica-ios">
-        <strong>Dica no iPhone:</strong> Clique em <em>Compartilhar / Imprimir</em> para enviar direto para o app da impressora ou escolha <em>Imprimir</em> / <em>Salvar Imagem</em> no menu do iOS. Você também pode pressionar e segurar a imagem acima para salvar.
+        <strong>Dica no iPhone:</strong> Ao abrir a tela de impressão do iOS, certifique-se de que o tamanho do papel está selecionado como <strong>9x3 cm (ou 90x30 mm)</strong> nas opções da impressora para evitar margens extras.
     </p>
 </div>
 
@@ -155,20 +154,20 @@
         const lote = document.getElementById('lote').value || 'N/A';
         const dataAtual = new Date().toLocaleDateString('pt-BR');
 
-        // 1. Preenche o fundo branco sólido (essencial para impressoras térmicas)
+        // 1. Fundo branco sólido
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 2. Configura a tipografia nítida em preto puro
+        // 2. Tipografia grande e nítida ocupando toda a área útil (1063 x 354)
         ctx.fillStyle = '#000000';
         ctx.textBaseline = 'top';
 
-        const margemEsquerda = 24;
-        let posY = 18;
-        const espacoLinha = 42;
+        const margemEsquerda = 30;
+        let posY = 20;
+        const espacoLinha = 65;
 
         // Linha 1: Data
-        ctx.font = 'bold 26px monospace';
+        ctx.font = 'bold 42px monospace';
         ctx.fillText(`Data: ${dataAtual}`, margemEsquerda, posY);
         posY += espacoLinha;
 
@@ -181,15 +180,14 @@
         posY += espacoLinha;
 
         // Linha 4: Peso e Quantidade
-        ctx.fillText(`Peso: ${peso}  |  Qtd: ${qtd}`, margemEsquerda, posY);
+        ctx.fillText(`Peso: ${peso} | Qtd: ${qtd}`, margemEsquerda, posY);
         posY += espacoLinha;
 
         // Linha 5: Lote
-        ctx.font = 'bold 24px monospace';
+        ctx.font = 'bold 38px monospace';
         ctx.fillText(`Lote: ${lote}`, margemEsquerda, posY);
     }
 
-    // Baixa a imagem PNG diretamente
     function baixarImagem() {
         const nome = document.getElementById('nome').value || 'cliente';
         const link = document.createElement('a');
@@ -198,14 +196,12 @@
         link.click();
     }
 
-    // Usa a API nativa de compartilhamento do iPhone/Android (abre o menu de Imprimir, Salvar na Galeria ou enviar pro app Zebra)
     function compartilharOuImprimir() {
         const nome = document.getElementById('nome').value || 'cliente';
         
         canvas.toBlob(async function(blob) {
             const arquivo = new File([blob], `etiqueta_${nome}.png`, { type: 'image/png' });
 
-            // Verifica se o navegador suporta compartilhamento nativo de arquivos (funciona no Safari iOS e Chrome Android)
             if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
                 try {
                     await navigator.share({
@@ -213,10 +209,9 @@
                         title: `Etiqueta - ${nome}`
                     });
                 } catch (err) {
-                    console.log('Compartilhamento cancelado ou falhou:', err);
+                    console.log('Compartilhamento cancelado:', err);
                 }
             } else {
-                // Fallback para computador desktop: abre apenas a imagem limpa em uma nova aba e chama a impressão
                 const dataUrl = canvas.toDataURL('image/png');
                 const janela = window.open('', '_blank');
                 janela.document.write(`
@@ -232,7 +227,6 @@
         }, 'image/png');
     }
 
-    // Desenha a etiqueta inicial assim que a página carrega
     window.onload = desenharEtiqueta;
 </script>
 
