@@ -100,6 +100,7 @@
     <div class="form-group">
         <label for="modeloSelect">Selecione o Modelo:</label>
         <select id="modeloSelect" onchange="mudarModelo()">
+            <option value="pedidos">Pedidos</option>
             <option value="bandejas">Bandejas</option>
             <option value="grilo">Grilo</option>
             <option value="pupas">Pupas</option>
@@ -107,8 +108,37 @@
         </select>
     </div>
 
+    <!-- MODELO: PEDIDOS -->
+    <div id="sec-pedidos" class="model-section active">
+        <h3>Modelo: Pedidos</h3>
+        <div class="form-group">
+            <label>Nome:</label>
+            <input type="text" id="ped_nome" value="DANILO/ALESSANDRA" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Destino:</label>
+            <input type="text" id="ped_destino" value="GUARULHOS" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Peso:</label>
+            <input type="text" id="ped_peso" value="1000g" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Quantidade (Qtd):</label>
+            <input type="text" id="ped_qtd" value="10000" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Texto Peso do Milheiro (Caixa Esquerda):</label>
+            <input type="text" id="ped_milheiro" value="55g (1000 larvas)" oninput="salvarDados()">
+        </div>
+        <div class="form-group">
+            <label>Rodapé (Lote, Quantidade, Peso):</label>
+            <input type="text" id="ped_rodape" value="TM-21082026-167, 10000, 600g" oninput="salvarDados()">
+        </div>
+    </div>
+
     <!-- MODELO: BANDEJAS -->
-    <div id="sec-bandejas" class="model-section active">
+    <div id="sec-bandejas" class="model-section">
         <h3>Modelo: Bandejas</h3>
         <div class="form-group">
             <label>Lote (LT):</label>
@@ -215,6 +245,12 @@
     function salvarDados() {
         const dados = {
             modelo: document.getElementById('modeloSelect').value,
+            ped_nome: document.getElementById('ped_nome').value,
+            ped_destino: document.getElementById('ped_destino').value,
+            ped_peso: document.getElementById('ped_peso').value,
+            ped_qtd: document.getElementById('ped_qtd').value,
+            ped_milheiro: document.getElementById('ped_milheiro').value,
+            ped_rodape: document.getElementById('ped_rodape').value,
             b_lote: document.getElementById('b_lote').value,
             b_inicio: document.getElementById('b_inicio').value,
             b_posturaNum: document.getElementById('b_posturaNum').value,
@@ -244,6 +280,12 @@
                     document.getElementById('modeloSelect').value = d.modelo;
                     mudarModelo();
                 }
+                if (d.ped_nome !== undefined) document.getElementById('ped_nome').value = d.ped_nome;
+                if (d.ped_destino !== undefined) document.getElementById('ped_destino').value = d.ped_destino;
+                if (d.ped_peso !== undefined) document.getElementById('ped_peso').value = d.ped_peso;
+                if (d.ped_qtd !== undefined) document.getElementById('ped_qtd').value = d.ped_qtd;
+                if (d.ped_milheiro !== undefined) document.getElementById('ped_milheiro').value = d.ped_milheiro;
+                if (d.ped_rodape !== undefined) document.getElementById('ped_rodape').value = d.ped_rodape;
                 if (d.b_lote !== undefined) document.getElementById('b_lote').value = d.b_lote;
                 if (d.b_inicio !== undefined) document.getElementById('b_inicio').value = d.b_inicio;
                 if (d.b_posturaNum !== undefined) document.getElementById('b_posturaNum').value = d.b_posturaNum;
@@ -270,7 +312,57 @@
         const modelo = document.getElementById('modeloSelect').value;
         let zpl = "";
 
-        if (modelo === 'bandejas') {
+        if (modelo === 'pedidos') {
+            const nome = limparTextoZPL(document.getElementById('ped_nome').value);
+            const destino = limparTextoZPL(document.getElementById('ped_destino').value);
+            const peso = limparTextoZPL(document.getElementById('ped_peso').value);
+            const qtd = limparTextoZPL(document.getElementById('ped_qtd').value);
+            const milheiro = limparTextoZPL(document.getElementById('ped_milheiro').value);
+            const rodape = limparTextoZPL(document.getElementById('ped_rodape').value);
+
+            zpl = `
+^XA
+~TA000
+~JSN
+^LT0
+^MNW
+^MTD
+^PON
+^PMN
+^LH0,0
+^JMA
+^PR4,4
+~SD8
+^JUS
+^LRN
+^CI27
+^PA0,1,1,0
+^XZ
+^XA
+^MMT
+^PW719
+^LL240
+^LS0
+^FO261,20^GB444,155,4^FS
+^FO263,70^GB442,0,4^FS
+^FO261,123^GB442,0,4^FS
+^FT268,61^A0N,41,41^FH\\^CI28^FDNome:^FS^CI27
+^FT268,113^A0N,41,41^FH\\^CI28^FDDestino:^FS^CI27
+^FT268,164^A0N,41,41^FH\\^CI28^FDPeso:^FS^CI27
+^FO20,20^GB225,75,4^FS
+^FO21,52^GB221,0,4^FS
+^FT27,45^A0N,20,20^FH\\^CI28^FDPeso do milheiro^FS^CI27
+^FT31,80^A0N,20,20^FH\\^CI28^FD${milheiro}^FS^CI27
+^FT14,192^A0N,17,18^FH\\^CI28^FDLOTE, QUANTIDADE, PESO:^FS^CI27
+^FT14,213^A0N,17,18^FH\\^CI28^FD${rodape}^FS^CI27
+^FT360,113^A0N,41,35^FB359,1,10,C^FH\\^CI28^FD${destino}\\5C&^FS^CI27
+^FT96,164^A0N,41,35^FB623,1,10,C^FH\\^CI28^FD${peso}\\5C&^FS^CI27
+^FT361,63^A0N,41,35^FB358,1,10,C^FH\\^CI28^FD${nome}\\5C&^FS^CI27
+^FT445,165^A0N,41,35^FB274,1,10,C^FH\\^CI28^FDQtd:${qtd}\\5C&^FS^CI27
+^PQ1,0,1,Y
+^XZ`;
+
+        } else if (modelo === 'bandejas') {
             const lote = limparTextoZPL(document.getElementById('b_lote').value);
             const inicio = limparTextoZPL(document.getElementById('b_inicio').value);
             const posturaNum = limparTextoZPL(document.getElementById('b_posturaNum').value);
